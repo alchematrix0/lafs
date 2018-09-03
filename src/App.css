@@ -1,4 +1,4 @@
-.App {
+/* .App {
   text-align: center;
 }
 
@@ -20,15 +20,19 @@
 
 .App-intro {
   font-size: large;
-}
+} */
 
-@keyframes App-logo-spin {
+/* @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
-}
+} */
 
 .hero.is-fullheight div.hero-body {
   align-items: flex-start!important;
+}
+
+.hero.is-info .navbar-item.addResourceButton:hover {
+  background-color: #fff;
 }
 
 label.checkbox input[type='checkbox'] {
@@ -37,6 +41,25 @@ label.checkbox input[type='checkbox'] {
   vertical-align: 'middle';
 }
 
-.filters input, .filters hr {
+div.card-content {
+  padding: 0.75rem 0.75rem 2rem 0.75rem ;
+}
+
+input.searchBar {
+  min-width: 20vw;
+}
+
+/* .filters input, .filters hr {
   max-width: 75%
+} */
+@media screen and (max-width: 769px) {
+  .filters .control {
+    text-align: center;
+  }
+}
+.filters {
+  margin-top: 0.5em;
+  /* position: fixed; */
+  /* right: 0; */
+  max-width: 100%;
 }

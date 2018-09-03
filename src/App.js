@@ -1,7 +1,26 @@
 import React, { Component } from 'react';
 import './App.css';
-import { Columns, Hero, Card, Media, Content, Section, Navbar, Heading, Breadcrumb, Tag, Label, Form, Button, Container } from 'react-bulma-components/full';
+import { Columns, Hero, Card, Media, Modal, Section, Navbar, Heading, Form, Button, Container } from 'react-bulma-components/full';
+import { Field, Control, Label, Input, Select,Help } from 'react-bulma-components/lib/components/form';
 const data = require("./data.json");
+const HoC = Component => {
+  class Controlled extends React.Component {
+    static displayName = 'Select';
+    state = {
+      value: '',
+    };
+    onChange = evt => {
+      this.setState({
+        value: evt.target.value,
+      });
+    };
+    render() {
+      return <Component onChange={this.onChange} value={this.state.value} {...this.props} />;
+    }
+  }
+  return Controlled;
+};
+const SelectControlled = HoC(Select);
 class App extends Component {
   constructor(props) {
     super(props)
@@ -13,7 +32,8 @@ class App extends Component {
       categories: [],
       subcategories: [],
       commodities: [],
-      resources: []
+      resources: [],
+      show: false
     }
   }
   applyFilters = (resources) => resources.filter(resource => {
@@ -40,6 +60,7 @@ class App extends Component {
   }
   toggleCategory = (e) => this.setState({ category: e.target.checked ? this.state.category.concat([e.target.name]) : this.state.category.filter(v => v !== e.target.name) })
   toggleCommodity = (e) => this.setState({ commodity: e.target.checked ? this.state.commodity.concat([e.target.name]) : this.state.commodity.filter(v => v !== e.target.name) })
+  toggleAddResource = (e) => this.setState({show: !this.state.show})
   componentWillMount () {
     let db = data.map(d => Object.assign({}, d, {
       terms: d.keys.split(',').concat([d.organization, d.category, d.web_link, d.subcategory]).map(t => t.trim().toLowerCase()),
@@ -49,7 +70,8 @@ class App extends Component {
     }))
     this.setState({
       categories: Array.from(new Set(data.map(resource => resource.category.toLowerCase().trim()).concat(data.map(resource => resource.subcategory.toLowerCase().trim())))),
-      commodities: Array.from(new Set(data.map(resource => resource.commodity.toLowerCase().trim()))),
+      subcategories: Array.from(new Set(data.map(resource => resource.subcategory.toLowerCase().trim()))),
+      commodities: Array.from(new Set(data.filter(d => d.commodity !== 'All').map(resource => resource.commodity.toLowerCase().trim()))),
       resources: db
     })
   }
@@ -59,7 +81,7 @@ class App extends Component {
     this.applyFilters(this.state.resources).map(resource => {
       let breadcrumbs = resource.category !== resource.subcategory ? [{name: resource.category, url: 'some-link', key : 1}, {name: resource.subcategory, url: '', key : 2}] : [{name: resource.category, url: 'some-link', key : 1}]
       return (
-        <Columns.Column size={6} key={resource.web_link}>
+        <Columns.Column size={4} key={resource.web_link}>
           <Card>
             <Card.Image size="4by3" src={resource.img} />
             <Card.Content>
@@ -73,8 +95,11 @@ class App extends Component {
                   </Heading>
                 </Media.Item>
               </Media>
-              <Breadcrumb style={{marginBottom: '-1em', textTransform: 'capitalize'}} items={breadcrumbs} />
-              <Content>
+              <div style={{textTransform: 'capitalize'}}>
+                {breadcrumbs.map((b, i) => i > 0 ? <span> / {b.name}</span> : <span>{b.name}</span>)}
+              </div>
+              {/* <Breadcrumb style={{marginBottom: '-1em', textTransform: 'capitalize'}} items={breadcrumbs} /> */}
+              {/* <Content>
                 <br />
                 {resource.keys.split(',').map((t, i) => {let tag = t.trim(); return (
                   <Tag key={`${i}${Math.random()}`}>
@@ -82,7 +107,7 @@ class App extends Component {
                   </Tag>
                 )})}
                 <br/>
-              </Content>
+              </Content> */}
             </Card.Content>
           </Card>
         </Columns.Column>
@@ -99,35 +124,106 @@ class App extends Component {
                 Farmer Resource Database
               </Navbar.Item>
             </Navbar.Brand>
+            <Navbar.Menu style={{justifyContent: 'end'}}>
+              <Navbar.Item className='addResourceButton' href="#" renderAs='div'>
+                <Button onClick={this.toggleAddResource}>New Resource</Button>
+              </Navbar.Item>
+            </Navbar.Menu>
           </Navbar>
         </Hero.Head>
         <Hero.Body>
           <Container>
             <Columns>
-              <Columns.Column size={8}>
-                <Columns>
-                  {this.renderResources()}
-                </Columns>
-              </Columns.Column>
-              <Columns.Column className='filters' style={{marginTop: '0.5em', position: 'fixed', right: '2em', maxWidth: '100%'}} size={4}>
+              <Columns.Column className='filters is-narrow is-centered-tablet is-centered-mobile'>
                 <Form.Control style={{marginBottom: '1em'}}>
-                  <Form.Input placeholder="search anything" value={this.state.searchInput} onChange={this.handleSearchInput}></Form.Input>
+                  <Form.Input className='searchBar' placeholder="search anything" value={this.state.searchInput} onChange={this.handleSearchInput}></Form.Input>
                 </Form.Control>
                 <Form.Control style={{marginBottom: '0.5em'}}><Heading>Category</Heading></Form.Control>
                 {this.state.categories.map((c, i) => (
                   <Form.Control fullwidth size='medium' key={i} style={{textTransform: 'capitalize'}}>
                     <Form.Checkbox name={c} onClick={this.toggleCategory}>{c}</Form.Checkbox>
                   </Form.Control>))}
-                <hr />
-                <Form.Control style={{marginBottom: '0.5em'}}><Heading>Commodity</Heading></Form.Control>
+                {/* <hr /> */}
+                <Form.Control style={{marginTop: '1em', marginBottom: '0.5em'}}><Heading>Commodity</Heading></Form.Control>
                 {this.state.commodities.map((c, i) => (
                   <Form.Control fullwidth size='medium' key={i} style={{textTransform: 'capitalize'}}>
                     <Form.Checkbox name={c} onClick={this.toggleCommodity}>{c}</Form.Checkbox>
                   </Form.Control>))}
               </Columns.Column>
+              <Columns.Column>
+                <Columns>
+                  {this.renderResources()}
+                </Columns>
+              </Columns.Column>
             </Columns>
           </Container>
         </Hero.Body>
+        <Modal onClose={this.toggleAddResource} show={this.state.show}>
+          <Modal.Content style={{minWidth: '80vw'}}>
+            <Section style={{ backgroundColor: 'white' }}>
+              <Field kind='group'>
+                <Control fullwidth={true} multiline={true} horizontal={true}>
+                  <Label>Resource Name</Label>
+                  <Input />
+                </Control>
+                <Control fullwidth={true} >
+                  <Label>Organization</Label>
+                  <Input />
+                </Control>
+              </Field>
+              <Field>
+                <Label>Key words</Label>
+                <Control>
+                  <Input placeholder="Separate with commas" />
+                </Control>
+              </Field>
+              <Field>
+                <Label>Resource Link</Label>
+                <Control>
+                  <Input type="text" />
+                </Control>
+              </Field>
+              <Field>
+                <Label>Image URL</Label>
+                <Control>
+                  <Input />
+                </Control>
+                <Help>Locate your image online, right click + copy image location, then paste here</Help>
+              </Field>
+              <Field kind='group' multiline={true}>
+                <Control>
+                  <Label>Category</Label>
+                  <SelectControlled>
+                    <option disabled={true} selected={true}>Select category</option>
+                    {this.state.categories.map(c => (<option value={c} style={{textTransform: 'capitalize'}}>{c}</option>))}
+                  </SelectControlled>
+                </Control>
+                <Control>
+                  <Label>Subcategory</Label>
+                  <SelectControlled>
+                    <option disabled={true} selected={true}>Select subcategory</option>
+                    {this.state.subcategories.map(c => (<option value={c} style={{textTransform: 'capitalize'}}>{c}</option>))}
+                  </SelectControlled>
+                </Control>
+                <Control>
+                  <Label>Commodity</Label>
+                  <SelectControlled>
+                    <option disabled={true} selected={true}>Select commodity</option>
+                    {this.state.commodities.map(c => (<option value={c} style={{textTransform: 'capitalize'}}>{c}</option>))}
+                  </SelectControlled>
+                </Control>
+              </Field>
+              <Field kind='group'>
+                <Control>
+                  <Button color='danger'>Cancel</Button>
+                </Control>
+                <Control align='right'>
+                  <Button color='info' type='submit'>Submit</Button>
+                </Control>
+              </Field>
+            </Section>
+          </Modal.Content>
+        </Modal>
       </Hero>
     );
   }
