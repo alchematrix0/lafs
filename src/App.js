@@ -1,8 +1,20 @@
 import React, { Component } from 'react';
 import './App.css';
 import { Columns, Hero, Card, Media, Modal, Section, Navbar, Heading, Form, Button, Container } from 'react-bulma-components/full';
-import { Field, Control, Label, Input, Select,Help } from 'react-bulma-components/lib/components/form';
+import { Field, Control, Label, Input, Select, Help } from 'react-bulma-components/lib/components/form';
 const data = require("./data.json");
+let imgLink = `https://www.lillooetagricultureandfood.org/wp-content/uploads/2018/09`
+const defaultImgs = {
+  'production': `${imgLink}/production.jpg`,
+  'important-contacts': `${imgLink}/important-contacts.jpg`,
+  'plans-regulations': `${imgLink}/plans-and-regulations-.jpeg`,
+  'education-learning': `${imgLink}/education-and-learning.jpg`,
+  'sales-distribution': `${imgLink}/sales-and-distribution.jpg`,
+  'funding': `${imgLink}/funding.jpg`,
+  'finances': `${imgLink}/finances.jpg`,
+  'operations': `${imgLink}/operations.jpg`,
+  'marketing': `${imgLink}/marketing.jpg`,
+}
 const HoC = Component => {
   class Controlled extends React.Component {
     static displayName = 'Select';
@@ -66,8 +78,10 @@ class App extends Component {
       terms: d.keys.split(',').concat([d.organization, d.category, d.web_link, d.subcategory]).map(t => t.trim().toLowerCase()),
       category: d.category.toLowerCase().trim(),
       subcategory: d.subcategory.toLowerCase().trim(),
-      commodity: d.commodity.toLowerCase().trim()
+      commodity: d.commodity.toLowerCase().trim(),
+      img: d.img || defaultImgs[d.category.toLowerCase().trim().replace(' & ', '-').replace(' ', '-')]
     }))
+    console.log(new Set(db.map(d => d.img)))
     this.setState({
       categories: Array.from(new Set(data.map(resource => resource.category.toLowerCase().trim()).concat(data.map(resource => resource.subcategory.toLowerCase().trim())))),
       subcategories: Array.from(new Set(data.map(resource => resource.subcategory.toLowerCase().trim()))),
@@ -78,10 +92,10 @@ class App extends Component {
 
   renderResources = () => {
     return this.state.category.length > 2 || this.state.commodity.length > 1 ? <h3>No matches possible, relax your sphincter!</h3> :
-    this.applyFilters(this.state.resources).map(resource => {
-      let breadcrumbs = resource.category !== resource.subcategory ? [{name: resource.category, url: 'some-link', key : 1}, {name: resource.subcategory, url: '', key : 2}] : [{name: resource.category, url: 'some-link', key : 1}]
+    this.applyFilters(this.state.resources).map((resource, index) => {
+      let breadcrumbs = resource.category !== resource.subcategory ? [{name: resource.category, url: 'some-link', key : index}, {name: resource.subcategory, url: '', key : index + '1'}] : [{name: resource.category, url: 'some-link', key : index}]
       return (
-        <Columns.Column size={4} key={resource.web_link}>
+        <Columns.Column size={4} key={resource.web_link + '_' + index}>
           <Card>
             <Card.Image size="4by3" src={resource.img} />
             <Card.Content>
@@ -96,7 +110,7 @@ class App extends Component {
                 </Media.Item>
               </Media>
               <div style={{textTransform: 'capitalize'}}>
-                {breadcrumbs.map((b, i) => i > 0 ? <span> / {b.name}</span> : <span>{b.name}</span>)}
+                {breadcrumbs.map((b, i) => i > 0 ? <span key={b.key}> / {b.name}</span> : <span key={b.key}>{b.name}</span>)}
               </div>
               {/* <Breadcrumb style={{marginBottom: '-1em', textTransform: 'capitalize'}} items={breadcrumbs} /> */}
               {/* <Content>
@@ -116,21 +130,21 @@ class App extends Component {
   }
   render() {
     return (
-      <Hero color="info" size="fullheight">
-        <Hero.Head renderAs="header">
+      <Hero size="fullheight">
+        {/* <Hero.Head renderAs="header">
           <Navbar fixed='top' color='white'>
             <Navbar.Brand>
-              <Navbar.Item href="#" renderAs='header'>
-                Farmer Resource Database
-              </Navbar.Item>
+          <Navbar.Item href="#" renderAs='header'>
+          Farmer Resource Database
+          </Navbar.Item>
             </Navbar.Brand>
             <Navbar.Menu style={{justifyContent: 'end'}}>
-              <Navbar.Item className='addResourceButton' href="#" renderAs='div'>
-                <Button onClick={this.toggleAddResource}>New Resource</Button>
-              </Navbar.Item>
+          <Navbar.Item className='addResourceButton' href="#" renderAs='div'>
+          <Button onClick={this.toggleAddResource}>New Resource</Button>
+          </Navbar.Item>
             </Navbar.Menu>
           </Navbar>
-        </Hero.Head>
+        </Hero.Head> */}
         <Hero.Body>
           <Container>
             <Columns>
@@ -139,7 +153,7 @@ class App extends Component {
                   <Form.Input className='searchBar' placeholder="search anything" value={this.state.searchInput} onChange={this.handleSearchInput}></Form.Input>
                 </Form.Control>
                 <Form.Control style={{marginBottom: '0.5em'}}><Heading>Category</Heading></Form.Control>
-                {this.state.categories.map((c, i) => (
+                {this.state.categories.filter(c => c).map((c, i) => (
                   <Form.Control fullwidth size='medium' key={i} style={{textTransform: 'capitalize'}}>
                     <Form.Checkbox name={c} onClick={this.toggleCategory}>{c}</Form.Checkbox>
                   </Form.Control>))}
@@ -194,21 +208,21 @@ class App extends Component {
                 <Control>
                   <Label>Category</Label>
                   <SelectControlled>
-                    <option disabled={true} selected={true}>Select category</option>
+                    <option key='option1' disabled={true} selected={true}>Select category</option>
                     {this.state.categories.map(c => (<option value={c} style={{textTransform: 'capitalize'}}>{c}</option>))}
                   </SelectControlled>
                 </Control>
                 <Control>
                   <Label>Subcategory</Label>
                   <SelectControlled>
-                    <option disabled={true} selected={true}>Select subcategory</option>
+                    <option key='option2' disabled={true} selected={true}>Select subcategory</option>
                     {this.state.subcategories.map(c => (<option value={c} style={{textTransform: 'capitalize'}}>{c}</option>))}
                   </SelectControlled>
                 </Control>
                 <Control>
                   <Label>Commodity</Label>
                   <SelectControlled>
-                    <option disabled={true} selected={true}>Select commodity</option>
+                    <option key='option3' disabled={true} selected={true}>Select commodity</option>
                     {this.state.commodities.map(c => (<option value={c} style={{textTransform: 'capitalize'}}>{c}</option>))}
                   </SelectControlled>
                 </Control>
