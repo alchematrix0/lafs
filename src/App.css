@@ -46,15 +46,31 @@ div.card-content {
 }
 
 input.searchBar {
-  min-width: 20vw;
+  /* min-width: 20vw; */
+  line-height: 0.75rem;
+  height: 75%;
 }
 
-/* .filters input, .filters hr {
-  max-width: 75%
-} */
+.category-heading, .commodity-heading {
+  font-family: Arial;
+}
+
+.category-heading.title, .commodity-heading.title {
+  font-size: 1.5rem;
+  font-family: Arial;
+}
+
+.category-checkbox {
+  font-family: Arial;
+}
+
+.filters .control {
+  font-size: 1rem;
+}
 @media screen and (max-width: 769px) {
-  .filters .control {
-    text-align: center;
+  .filters .control:not(:first-child) {
+    padding-left: 2em;
+    /* text-align: center; */
   }
 }
 .filters {
@@ -62,4 +78,24 @@ input.searchBar {
   /* position: fixed; */
   /* right: 0; */
   max-width: 100%;
+}
+
+div.content-wrapper.full-width.without-featured-image {
+  margin: 0!important;
+}
+
+div.rsbox {
+  display: -ms-flexbox;
+	-ms-flex-direction: column;
+	-ms-flex-wrap: wrap;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	height: inherit;
+	font-size: 0;
+}
+
+div.rsr {
+  width: 33.3%;
+  transition: .8s opacity;
 }
