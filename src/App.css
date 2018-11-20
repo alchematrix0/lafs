@@ -1,38 +1,13 @@
-/* .App {
-  text-align: center;
-}
-
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
-}
-
-.App-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
-}
-
-.App-title {
-  font-size: 1.5em;
-}
-
-.App-intro {
-  font-size: large;
-} */
-
-/* @keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-} */
-
 .hero.is-fullheight div.hero-body {
   align-items: flex-start!important;
 }
 
 .hero.is-info .navbar-item.addResourceButton:hover {
   background-color: #fff;
+}
+
+.pageHeader {
+  font-family: arial;
 }
 
 label.checkbox input[type='checkbox'] {
@@ -45,10 +20,15 @@ div.card-content {
   padding: 0.75rem 0.75rem 2rem 0.75rem ;
 }
 
+.resource-title {
+  letter-spacing: 0;
+}
+
 input.searchBar {
-  /* min-width: 20vw; */
-  line-height: 0.75rem;
-  height: 75%;
+  line-height: 0.35rem;
+  height: 60%;
+  font-size: 14px;
+  max-width: 90%;
 }
 
 .category-heading, .commodity-heading {
@@ -56,8 +36,10 @@ input.searchBar {
 }
 
 .category-heading.title, .commodity-heading.title {
-  font-size: 1.5rem;
+  font-size: 1.125rem;
+  color: #77b749;
   font-family: Arial;
+  letter-spacing: 0px;
 }
 
 .category-checkbox {
@@ -65,7 +47,7 @@ input.searchBar {
 }
 
 .filters .control {
-  font-size: 1rem;
+  font-size: 0.875rem;
 }
 @media screen and (max-width: 769px) {
   .filters .control:not(:first-child) {
@@ -80,62 +62,32 @@ input.searchBar {
   max-width: 100%;
 }
 
-a.toTop.button {
-  z-index: 1500
-}
-
-@media screen and (min-width: 1068px) {
-  a.toTop.button {
-    position: fixed;
-    top: 1em;
-    right: 1em;
-  }
-}
-
-@media screen and (min-width: 769px) and (max-width: 1068px) {
-  a.toTop.button {
-    position: fixed;
-    bottom: 1em;
+@media screen and (min-width: 769px) and (max-width: 1067px){
+  img.toTop {
     left: 1em;
   }
 }
 
-@media screen and (max-width: 768px) {
-  a.toTop.button {
-    position: fixed;
-    bottom: 1em;
+@media screen and (min-width: 1068px) {
+  img.toTop {
     right: 1em;
   }
 }
+
+@media screen and (max-width: 768px) {
+  img.toTop {
+    right: 1em;
+  }
+}
+
 img.toTop {
+  bottom: 1em;
+  position: fixed;
   cursor: pointer;
   z-index: 1500;
   background-color: white;
   border-radius: 50%;
-}
-
-@media screen and (min-width: 1068px) {
-  img.toTop {
-    position: fixed;
-    top: 1em;
-    right: 1em;
-  }
-}
-
-@media screen and (min-width: 769px) and (max-width: 1068px) {
-  img.toTop {
-    position: fixed;
-    bottom: 1em;
-    left: 1em;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  img.toTop {
-    position: fixed;
-    bottom: 1em;
-    right: 1em;
-  }
+  max-width: 25px;
 }
 
 div.content-wrapper.full-width.without-featured-image {

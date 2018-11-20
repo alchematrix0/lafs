@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import './App.css';
 import { Columns, Hero, Card, Media, Modal, Section, Heading, Form, Button, Container } from 'react-bulma-components/full';
 import { Field, Control, Label, Input, Select, Help } from 'react-bulma-components/lib/components/form';
-const data = require('./data.json');
 let imgLink = `https://www.lillooetagricultureandfood.org/wp-content/uploads/2018/09`;
 const defaultImgs = {
   'production': `${imgLink}/production.jpg`,
@@ -59,8 +58,29 @@ class App extends Component {
       show: false
     }
   }
-  returnToTop = () => {
-    window.scrollTo(0,0)
+  returnToTop = () => window.scrollTo(0, 360)
+  handleSearchInput = (e) => this.setState({searchInput: e.target.value})
+  toggleCategory = (e) => this.setState({ category: e.target.checked ? this.state.category.concat([e.target.name]) : this.state.category.filter(v => v !== e.target.name) })
+  toggleCommodity = (e) => this.setState({ commodity: e.target.checked ? this.state.commodity.concat([e.target.name]) : this.state.commodity.filter(v => v !== e.target.name) })
+  static getDerivedStateFromProps (props, prevState) {
+    if (!props.resources) {
+      return null
+    } else {
+      let data = props.resources.map(d => Object.assign({category: '', subcategory: '', commodity: ''}, d))
+      let db = data.map(d => Object.assign(d, {
+        terms: d.keys.split(',').concat([d.resource, d.organization, d.category, d.web_link, d.subcategory]).map(t => t.trim().toLowerCase()),
+        category: d.category.toLowerCase().trim(),
+        subcategory: d.subcategory.toLowerCase().trim(),
+        commodity: d.commodity.toLowerCase().trim(),
+        img: d.img || defaultImgs[Math.random() > 0.5 ? `${d.category.toLowerCase().trim().replace(' & ', '-').replace(' ', '-')}` : `${d.category.toLowerCase().trim().replace(' & ', '-').replace(' ', '-')}2`]
+      }))
+      return {
+        categories: Array.from(new Set(db.map(resource => resource.category).concat(db.map(resource => resource.subcategory)))),
+        subcategories: Array.from(new Set(db.map(resource => resource.subcategory))),
+        commodities: Array.from(new Set(db.filter(d => d.commodity !== 'All' && d.commodity !== 'all').map(resource => resource.commodity))),
+        resources: db
+      }
+    }
   }
   applyFilters = (resources) => resources.filter(resource => {
     if (this.state.searchInput.length && !resource.terms.some(t => t.includes(this.state.searchInput.toLowerCase()))) {
@@ -73,68 +93,40 @@ class App extends Component {
       (!category.length && !commodity.length) ||
       // or, if we have checkbox selections
         // first option: we have a category and a commodity, they must both match to return true
-      (category.length && commodity.length && category.every(c => cats.includes(c)) && commodity.every(c => resource.commodity === c)) ||
+      (category.length && commodity.length && category.every(c => cats.includes(c)) && commodity.every(c => resource.commodity === c || resource.commodity === 'all')) ||
         // second option: we have no category and a commodity
-      (!category.length && commodity.length && commodity.every(c => resource.commodity === c)) ||
+      (!category.length && commodity.length && commodity.every(c => resource.commodity === c  || resource.commodity === 'all')) ||
         // third option: we have no commodity and a category
       (!commodity.length && category.length && category.every(c => cats.includes(c)))
       // (this.state.searchInput.length && resource.keys.split(',').map(t => t.trim()).some(k => k.toLowerCase().includes(this.state.searchInput)))
     )
   })
-  handleSearchInput = (e) => {
-    this.setState({searchInput: e.target.value})
-  }
-  toggleCategory = (e) => this.setState({ category: e.target.checked ? this.state.category.concat([e.target.name]) : this.state.category.filter(v => v !== e.target.name) })
-  toggleCommodity = (e) => this.setState({ commodity: e.target.checked ? this.state.commodity.concat([e.target.name]) : this.state.commodity.filter(v => v !== e.target.name) })
-  toggleAddResource = (e) => this.setState({show: !this.state.show})
-  defineStateOnLoad = (resources = []) => {
-    let db = resources.map(d => Object.assign({}, d, {
-      terms: d.keys.split(',').concat([d.organization, d.category, d.web_link, d.subcategory]).map(t => t.trim().toLowerCase()),
-      category: d.category.toLowerCase().trim(),
-      subcategory: d.subcategory.toLowerCase().trim(),
-      commodity: d.commodity.toLowerCase().trim(),
-      img: d.img || defaultImgs[Math.random() > 0.5 ? `${d.category.toLowerCase().trim().replace(' & ', '-').replace(' ', '-')}` : `${d.category.toLowerCase().trim().replace(' & ', '-').replace(' ', '-')}2`]
-    }))
-    this.setState({
-      categories: Array.from(new Set(data.map(resource => resource.category.toLowerCase().trim()).concat(data.map(resource => resource.subcategory.toLowerCase().trim())))),
-      subcategories: Array.from(new Set(data.map(resource => resource.subcategory.toLowerCase().trim()))),
-      commodities: Array.from(new Set(data.filter(d => d.commodity !== 'All').map(resource => resource.commodity.toLowerCase().trim()))),
-      resources: db
-    })
-  }
-  componentWillMount () {
-    return fetch(`https://www.lillooetagricultureandfood.org/wp-content/uploads/js/newrsrcs.js`).then(data => data.json())
-    .then(additionalResources => { this.defineStateOnLoad(additionalResources) })
-    .catch(error => {
-      console.error(error)
-      this.defineStateOnLoad(data)
-    })
-  }
-
   renderResources = () => {
-    return this.state.category.length > 2 || this.state.commodity.length > 1 ? <h3>No matches possible, relax your sphincter!</h3> :
+    return this.state.category.length > 2 || this.state.commodity.length > 1 ? <h3 style={{marginTop: '1em'}}>No matches found. Ease up on the throttle cowboy.</h3> :
     this.applyFilters(this.state.resources).map((resource, index) => {
       let breadcrumbs = resource.category !== resource.subcategory ? [{name: resource.category, url: 'some-link', key : index}, {name: resource.subcategory, url: '', key : index + '1'}] : [{name: resource.category, url: 'some-link', key : index}]
       return (
         <Columns.Column size={4} key={resource.web_link + '_' + index}>
-          <Card>
-            <Card.Image style={{height: 'auto'}} src={resource.img} />
-            <Card.Content>
-              <Media>
-                <Media.Item>
-                  <Heading style={{color: '#77b749', textTransform: 'capitalize'}} size={5}>
-                    <a href={resource.web_link} style={{color: '#77b749', textDecoration: 'none', fontFamily: 'Arial'}} target='_blank'>{resource.resource}</a>
-                  </Heading>
-                  <Heading subtitle style={{color: 'black', textTransform: 'capitalize', fontFamily: 'Arial'}} size={6}>
-                    {resource.organization}
-                  </Heading>
-                </Media.Item>
-              </Media>
-              <div style={{textTransform: 'capitalize', fontSize: '0.8rem'}}>
-                {breadcrumbs.map((b, i) => i > 0 ? <span key={b.key}> / {b.name}</span> : <span key={b.key}>{b.name}</span>)}
-              </div>
-            </Card.Content>
-          </Card>
+          <a href={resource.web_link} target='_blank' rel='noopener noreferrer'>
+            <Card>
+              <Card.Image style={{height: 'auto'}} src={resource.img} />
+              <Card.Content>
+                <Media>
+                  <Media.Item>
+                    <Heading className='resource-title' style={{color: '#77b749', textTransform: 'capitalize', letterSpacing: 0}} size={5}>
+                      <p style={{color: '#77b749', textDecoration: 'none', fontFamily: 'Arial', letterSpacing: 0}} target='_blank'>{resource.resource}</p>
+                    </Heading>
+                    <Heading subtitle style={{color: 'black', textTransform: 'capitalize', fontFamily: 'Arial'}} size={6}>
+                      {resource.organization}
+                    </Heading>
+                  </Media.Item>
+                </Media>
+                <div style={{textTransform: 'capitalize', fontSize: '0.8rem'}}>
+                  {breadcrumbs.map((b, i) => i > 0 ? <span key={b.key}> / {b.name}</span> : <span key={b.key}>{b.name}</span>)}
+                </div>
+              </Card.Content>
+            </Card>
+          </a>
         </Columns.Column>
       )
     })
@@ -168,12 +160,26 @@ class App extends Component {
     })
   }
   render() {
+    const center = { textAlign: 'center', textTransform: 'unset' };
     return (
       <Hero size='fullheight'>
+        <Hero.Head style={center} className="pageHeader" renderAs="header">
+          <Heading className='is-spaced' style={{textAlign: 'center', marginTop: '1em', color: '#77b749', letterSpacing: 0, fontFamily: 'arial', textTransform: 'unset'}} size={3}>Agriculture Resource Database</Heading>
+          <Heading style={center} subtitle>
+            <span style={{fontSize: '18px', marginTop: '1em', letterSpacing: 0, fontFamily: 'arial'}}>
+              Welcome to the Agriculture Resource Database. You can search by keyword, resource category or type of commodity.
+            </span>
+            <br />
+            <span style={{fontSize: '18px', marginTop: '1em', letterSpacing: 0, fontFamily: 'arial'}}>
+              Not finding what you’re looking for? Running into problems? Know of a resource that should be added? Please contact <span style={{color: 'rgb(119, 183, 73)'}}>lillooetagricultureandfood@gmail.com</span>.
+            </span>
+          </Heading>
+        </Hero.Head>
         <Hero.Body>
           <Container>
             <Columns>
-              <Columns.Column className='filters is-narrow is-centered-tablet is-centered-mobile'>
+              {/* FILTERS */}
+              <Columns.Column className='filters is-3 is-centered-tablet is-centered-mobile'>
                 <Form.Control style={{marginBottom: '1em'}}>
                   <Form.Input className='searchBar' placeholder='search by keyword' value={this.state.searchInput} onChange={this.handleSearchInput}></Form.Input>
                 </Form.Control>
@@ -193,6 +199,7 @@ class App extends Component {
                     <Form.Checkbox name={c} onClick={this.toggleCommodity}>{c}</Form.Checkbox>
                   </Form.Control>))}
               </Columns.Column>
+              {/* Resources */}
               <Columns.Column>
                 <img onClick={this.returnToTop} className='toTop toTopIcon' alt='return to top icon' src='/up.svg' />
                 <Columns>
