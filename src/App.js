@@ -59,6 +59,9 @@ class App extends Component {
       show: false
     }
   }
+  returnToTop = () => {
+    window.scrollTo(0,0)
+  }
   applyFilters = (resources) => resources.filter(resource => {
     if (this.state.searchInput.length && !resource.terms.some(t => t.includes(this.state.searchInput.toLowerCase()))) {
       return false
@@ -113,7 +116,7 @@ class App extends Component {
     this.applyFilters(this.state.resources).map((resource, index) => {
       let breadcrumbs = resource.category !== resource.subcategory ? [{name: resource.category, url: 'some-link', key : index}, {name: resource.subcategory, url: '', key : index + '1'}] : [{name: resource.category, url: 'some-link', key : index}]
       return (
-        <Columns.Column size={4} style={{alignSelf: 'center'}} key={resource.web_link + '_' + index}>
+        <Columns.Column size={4} key={resource.web_link + '_' + index}>
           <Card>
             <Card.Image style={{height: 'auto'}} src={resource.img} />
             <Card.Content>
@@ -191,9 +194,7 @@ class App extends Component {
                   </Form.Control>))}
               </Columns.Column>
               <Columns.Column>
-                {/* <Columns className='rsbox'>
-                  {this.renderResourcesPin()}
-                </Columns> */}
+                <img onClick={this.returnToTop} className='toTop toTopIcon' alt='return to top icon' src='/up.svg' />
                 <Columns>
                   {this.renderResources()}
                 </Columns>

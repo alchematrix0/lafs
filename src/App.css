@@ -80,6 +80,64 @@ input.searchBar {
   max-width: 100%;
 }
 
+a.toTop.button {
+  z-index: 1500
+}
+
+@media screen and (min-width: 1068px) {
+  a.toTop.button {
+    position: fixed;
+    top: 1em;
+    right: 1em;
+  }
+}
+
+@media screen and (min-width: 769px) and (max-width: 1068px) {
+  a.toTop.button {
+    position: fixed;
+    bottom: 1em;
+    left: 1em;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  a.toTop.button {
+    position: fixed;
+    bottom: 1em;
+    right: 1em;
+  }
+}
+img.toTop {
+  cursor: pointer;
+  z-index: 1500;
+  background-color: white;
+  border-radius: 50%;
+}
+
+@media screen and (min-width: 1068px) {
+  img.toTop {
+    position: fixed;
+    top: 1em;
+    right: 1em;
+  }
+}
+
+@media screen and (min-width: 769px) and (max-width: 1068px) {
+  img.toTop {
+    position: fixed;
+    bottom: 1em;
+    left: 1em;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  img.toTop {
+    position: fixed;
+    bottom: 1em;
+    right: 1em;
+  }
+}
+
 div.content-wrapper.full-width.without-featured-image {
   margin: 0!important;
 }
